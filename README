@@ -1,0 +1,40 @@
+1) Download attached Vagrant file for CentOS 7
+2) Edit machine properties (optional)
+3) Launch VM: "vagrant up"
+4) ssh to VM when finished: "vagrant ssh"
+5) switch to root - su (password: vagrant)
+6) update yum to retrieve latest kernel: "yum update -y"
+7) reboot machine to update kernel: "reboot"
+8) return to shell as root 
+9) install required packages to build ovs: 
+	yum install -y gcc make python-devel openssl-devel kernel-devel graphviz \
+       kernel-debug-devel autoconf automake rpm-build redhat-rpm-config \
+       libtool
+10) clone v8 patch for NSH enabled ovs:
+	git clone https://github.com/priteshk/ovs.git
+11) build distribution tarball file:
+	cd ovs
+    ./boot.sh
+    ./configure
+    make dist
+12) copy file to "RPM/SOURCES" folder & to temp folder (/opt):
+	mkdir -p /root/rpmbuild/SOURCES
+	cp openvswitch-2.4.90.tar.gz /root/rpmbuild/SOURCES
+	cp openvswitch-2.4.90.tar.gz /opt
+13) extract tarball and build userspace package
+	cd /opt
+	tar xzf openvswitch-2.4.90.tar.gz
+	cd openvswitch-2.4.90
+	rpmbuild -bb --without check rhel/openvswitch.spec
+14) paste following line to solve warning while building kmod:
+	cat >> rhel/openvswitch-kmod-rhel6.spec << EOF
+	%files
+	%defattr(-,root,root,-)
+	/etc/depmod.d/openvswitch.conf
+	EOF
+15) build kernel modules:
+	rpmbuild -bb -D "kversion `uname -r`" -D "kflavors default" rhel/openvswitch-kmod-rhel6.spec      
+16) install rpm:
+	rpm -ivh /root/rpmbuild/RPMS/x86_64/openvswitch-*
+17) start ovs:
+	systemctl start openvswitch 
