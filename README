@@ -9,7 +9,7 @@
 9) install required packages to build ovs: 
 	yum install -y gcc make python-devel openssl-devel kernel-devel graphviz \
        kernel-debug-devel autoconf automake rpm-build redhat-rpm-config \
-       libtool
+       libtool git
 10) clone v8 patch for NSH enabled ovs:
 	git clone https://github.com/priteshk/ovs.git
 11) build distribution tarball file:
